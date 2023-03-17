@@ -1,0 +1,7 @@
+
+
+
+provider "remotefile" {
+  # Configuration options
+}
+

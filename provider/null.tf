@@ -1,0 +1,7 @@
+
+
+
+provider "null" {
+  # Configuration options
+}
+
