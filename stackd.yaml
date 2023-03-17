@@ -1,0 +1,7 @@
+kind: core
+
+install:
+  - src: versions.yaml
+    dest: versions2.yaml
+  - src: provider
+  - src: templates
