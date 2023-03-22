@@ -4,16 +4,10 @@ kind: repo
 name: core
 
 # copies this files to target iac
-install:
-  - src: versions.yaml
-  - src: provider
-  - src: templates
-  - src: Dockerfile
-
-# exported libs
-libs:
-  - lib
-  - lib2
-
+# install:
+#   - src: versions.yaml
+#   - src: provider
+#   - src: templates
+#   - src: Dockerfile
 
 stacks: []
