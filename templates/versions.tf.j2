@@ -1,0 +1,16 @@
+
+terraform {
+
+  backend "{{vars.tf_state_backend}}" {}
+
+  required_providers {
+    {% for v in versions %}
+      {{v.name}} = {
+        source = "{{v.source}}"
+        version = "{{v.version}}"
+      }
+    {%endfor%}
+    
+  }
+
+}

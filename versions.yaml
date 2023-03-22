@@ -1,87 +1,77 @@
-versions:
-  hcloud:
-    source: "hetznercloud/hcloud"
-    version: "1.36.2"
+
+hcloud:
+  source: "hetznercloud/hcloud"
+  version: "1.36.2"
+
+# hetznerdns:
+#   source: "timohirt/hetznerdns"
+#   version: "1.1.1"
   
-  # hetznerdns:
-  #   source: "timohirt/hetznerdns"
-  #   version: "1.1.1"
-    
-  kubectl:
-    source: "gavinbunney/kubectl"
-    version: ">= 1.7.0"
-    
-  helm:
-    source: "hashicorp/helm"
-    version: "2.9.0"
-
-  kubernetes:
-    source: "hashicorp/kubernetes"
-    version: "2.18.1"
+kubectl:
+  source: "gavinbunney/kubectl"
+  version: ">= 1.7.0"
   
-  vault:
-    source: "hashicorp/vault"
-    version: "3.13.0"
+helm:
+  source: "hashicorp/helm"
+  version: "2.9.0"
 
-  aws:
-    source: "hashicorp/aws"
-    version: "4.11.0"
-  
-  gitlab:
-    source: "gitlabhq/gitlab"
-    version: "3.7.0"
+kubernetes:
+  source: "hashicorp/kubernetes"
+  version: "2.18.1"
 
-  pkcs12:
-    source: "chilicat/pkcs12"
-    version: "0.0.7"
-  
-  cloudflare:
-    source: "cloudflare/cloudflare"
-    version: "~> 3.0"
+vault:
+  source: "hashicorp/vault"
+  version: "3.13.0"
 
-  remotefile:
-    source: "mabunixda/remotefile"
-    version: "0.1.1"
+aws:
+  source: "hashicorp/aws"
+  version: "4.11.0"
 
-  grafana:
-    source: "grafana/grafana"
-    version: "1.22.0"
+gitlab:
+  source: "gitlabhq/gitlab"
+  version: "3.7.0"
 
-  confluence:
-    source: "DrFaust92/confluence"
-    version: "0.1.0"
+pkcs12:
+  source: "chilicat/pkcs12"
+  version: "0.0.7"
 
-  sentry:
-    source: "jianyuan/sentry"
-    version: "0.8.0"
+cloudflare:
+  source: "cloudflare/cloudflare"
+  version: "~> 3.0"
 
-  random:
-    source: "hashicorp/random"
-    version: "3.3.1"    
+remotefile:
+  source: "mabunixda/remotefile"
+  version: "0.1.1"
 
-  
-  ansible:
-    source: "habakke/ansible"
-    version: "2.0.1"
+grafana:
+  source: "grafana/grafana"
+  version: "1.22.0"
 
-  argocd:
-    source: "oboukili/argocd"
-    version: "4.2.0"
+confluence:
+  source: "DrFaust92/confluence"
+  version: "0.1.0"
 
-  "null":
-    source: "hashicorp/null"
-    version: "3.2.1"
+sentry:
+  source: "jianyuan/sentry"
+  version: "0.8.0"
 
-  local:
-    source: "hashicorp/local"
-    version: "2.3.0"
+random:
+  source: "hashicorp/random"
+  version: "3.3.1"    
 
-providers:
-  bootstrap: [hcloud, vault, aws]
-  bootstrap2: [hcloud, vault, kubernetes, kubectl, helm, cluster_secret, aws] # 4kube - need refactoring
-  k8sx: [vault, kubernetes, kubectl, helm, cluster_secret]
-  helm: [vault, helm, cluster_secret]
-  k8sg: [vault, gitlab, kubernetes, kubectl, helm, cluster_secret]
-  k8sk: [vault, gitlab, kubernetes, helm, cluster_secret]
-  k8s: [vault, kubernetes, helm, cluster_secret]
-  vault: [vault]
+
+ansible:
+  source: "habakke/ansible"
+  version: "2.0.1"
+
+argocd:
+  source: "oboukili/argocd"
+  version: "4.2.0"
+
+"null":
+  source: "hashicorp/null"
+  version: "3.2.1"
+
+local:
+  source: "hashicorp/local"
+  version: "2.3.0"

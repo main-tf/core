@@ -1,0 +1,19 @@
+/*
+
+not saving keys in the repo
+use environment variables when executing
+
+$ export AWS_ACCESS_KEY_ID="anaccesskey"
+$ export AWS_SECRET_ACCESS_KEY="asecretkey"
+*/
+  
+remote_state {
+  backend = "s3"
+  config = {
+    bucket = "{{vars.tf_state_bucket}}"
+    key = "{{vars.tf_state_key}}"
+    region = "{{vars.tf_state_bucket_region}}"
+    encrypt = true
+  }
+}
+

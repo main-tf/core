@@ -1,13 +1,19 @@
 ---
 
-kind: core
+kind: repo
+name: core
 
+# copies this files to target iac
 install:
   - src: versions.yaml
   - src: provider
   - src: templates
   - src: Dockerfile
 
+# exported libs
 libs:
-  - dest: lib/core
-    src: lib
+  - lib
+  - lib2
+
+
+stacks: []

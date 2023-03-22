@@ -1,0 +1,52 @@
+{% include module.remote_state_template %}
+
+{% for provider in module.providers %}
+generate "provider.{{provider}}" {
+  path = "provider.{{provider}}.tf"
+  if_exists = "overwrite_terragrunt"
+  contents = file("{{stackd.root}}/provider/{{provider}}.tf")
+}
+{% endfor %}
+
+generate "variables" {
+  path = "_variables.tf"
+  if_exists = "overwrite"
+  contents = file("./_variables.tf")
+}
+
+generate "versions" {
+  path = "_versions.tf"
+  if_exists = "overwrite"
+  contents = file("./_versions.tf")
+}
+
+terraform {
+  
+  source = "{{module.abssrc}}"  // ewtf {{module}} {{module.abssrc}}
+
+  extra_arguments "auto_approve" {
+    commands  = ["apply", "destroy"]
+    arguments = ["-auto-approve"]
+  }
+  
+ extra_arguments "init_upgrade" {
+    commands  = ["init"]
+    arguments = ["-upgrade"]
+  }
+extra_arguments "nowarn" {
+    commands  = ["plan"]
+    arguments = ["-compact-warnings"]
+  }
+
+  extra_arguments "common_vars" {
+    commands = get_terraform_commands_that_need_vars()
+
+    arguments = [
+      "-var-file=vars.tfvars.json",
+      "-compact-warnings"
+    ]
+
+
+  }
+
+}
