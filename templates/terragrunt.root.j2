@@ -22,7 +22,7 @@ generate "versions" {
 
 terraform {
   
-  source = "{{module.abssrc}}"  // ewtf {{module}} {{module.abssrc}}
+  source = "{{module.tg_module_src}}"
 
   extra_arguments "auto_approve" {
     commands  = ["apply", "destroy"]
