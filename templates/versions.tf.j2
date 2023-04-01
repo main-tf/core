@@ -1,7 +1,7 @@
 
 terraform {
 
-  backend "{{vars.tf_state_backend}}" {}
+  backend "{{tf_backend.name}}" {}
 
   required_providers {
     {% for v in versions %}

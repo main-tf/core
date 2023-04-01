@@ -1,4 +1,13 @@
-{% include module.remote_state_template %}
+
+remote_state {
+  backend = "{{tf_backend.name}}"
+  config = {
+    {% for k,v in tf_backend.config.items() -%}
+    {{k}} = {{v | tojson}}
+    {% endfor %}
+  }
+}
+
 
 {% for provider in module.providers %}
 generate "provider.{{provider}}" {
@@ -6,7 +15,7 @@ generate "provider.{{provider}}" {
   if_exists = "overwrite_terragrunt"
   contents = file("{{stackd.root}}/provider/{{provider}}.tf")
 }
-{% endfor %}
+{%- endfor %}
 
 generate "variables" {
   path = "_variables.tf"
@@ -50,3 +59,23 @@ extra_arguments "nowarn" {
   }
 
 }
+
+{% if module.deps %}
+dependencies {
+  paths = {{ module_deps | tojson }}
+}
+{% endif %}
+
+{% for inp in inputs %}
+dependency "{{inp.varname}}" {
+    config_path = "{{inp.abspath}}"
+}
+{% endfor %}
+
+{% if inputs %}
+inputs = {
+  {% for inp in inputs -%}
+  {{inp.varname}} = dependency["{{inp.varname}}"].outputs
+  {% endfor %}
+}
+{% endif %}
