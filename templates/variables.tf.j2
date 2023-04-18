@@ -13,5 +13,10 @@ variable "{{v.name}}" {
 }
 {%endfor%}
 
+variable "_stackd" {
+  type = any
+}
 
-
+locals {
+  stackd = var._stackd
+}
