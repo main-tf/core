@@ -3,6 +3,16 @@ entries:
   app:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2023-05-03T13:36:23.211281253Z"
+    description: Base chart for stackd applications
+    digest: 81808cf9508daaee0c6090c761ac9b38ae417bd5745108a04493bfd9afe80f0e
+    name: app
+    type: application
+    urls:
+    - https://github.com/stackdiac/core/releases/download/app-0.0.4/app-0.0.4.tgz
+    version: 0.0.4
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2023-05-03T13:21:00.558937551Z"
     description: Base chart for stackd applications
     digest: cfba9b7eda9840ae61b719d07bcc35b185768d7a00e8739805d7e5760520a753
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/stackdiac/core/releases/download/app-0.0.1/app-0.0.1.tgz
     version: 0.0.1
-generated: "2023-05-03T13:21:00.558948352Z"
+generated: "2023-05-03T13:36:23.211292953Z"
