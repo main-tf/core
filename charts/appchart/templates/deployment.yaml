@@ -55,8 +55,8 @@ spec:
                 name: {{ . }}
           {{ end }}
           ports: {{ .Values.container.ports | toJson }}
-          {{ with .Values.container.livenessProbe }}livenessProbe: {{ .Values.container.livenessProbe | toJson }}{{end}}
-          {{ with .Values.container.readinessProbe }}readinessProbe: {{ .Values.container.readinessProbe | toJson }}{{end}}
+          {{ with .Values.container.livenessProbe }}livenessProbe: {{ . | toJson }}{{end}}
+          {{ with .Values.container.readinessProbe }}readinessProbe: {{ . | toJson }}{{end}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
