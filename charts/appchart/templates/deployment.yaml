@@ -1,0 +1,77 @@
+{{- $root := . -}}
+{{- range $i, $svc := $root.Values.services -}}
+
+{{ $r := deepCopy $root }}
+
+{{ with mustMergeOverwrite $r $svc }}
+
+{{ if .Values.container.enabled -}}
+---
+
+{{ $replicas := get .Values.replicas .Values.nameOverride | default "1" }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}    
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ $replicas }}
+  {{- end }}    
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{with $root}}
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
+      {{end}}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: {{ .Values.container.command | toJson }}
+          args: {{ .Values.container.args | toJson }}
+          {{ with .Values.container.envFromSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ . }}
+          {{ end }}
+          ports: {{ .Values.container.ports | toJson }}
+          {{ with .Values.container.livenessProbe }}livenessProbe: {{ .Values.container.livenessProbe | toJson }}{{end}}
+          {{ with .Values.container.readinessProbe }}readinessProbe: {{ .Values.container.readinessProbe | toJson }}{{end}}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{end}}
+
+{{end}}
+{{end}}
