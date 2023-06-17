@@ -1,0 +1,139 @@
+# kubespray
+
+schema: !include core:stack/kubespray/schema.yaml
+
+# operations:
+#   deploy:
+#     configurations:
+#       default:
+#         command: apply
+#         modules: [pki, dns-zone, nodes, inventory, kubernetes, cluster-secret, hcloud-ccm]
+  
+#   scale:
+#     configurations:
+#       default:
+#         command: apply
+#         title: "hcloud nodes scalinig"
+#         modules: [nodes, inventory, kubernetes]
+
+#   upgrade:
+#     configurations:
+#       default:
+#         command: apply
+#         title: "upgrade k8s cluster"
+#         name: upgrade
+#         modules: [inventory, upgrade]
+
+operations:
+  upgrade-cluster:
+    pipeline:
+      - module: nodes
+      - module: dedicated-nodes
+      - module: kubespray
+        vars:
+          playbook: upgrade-cluster.yml
+
+  unsafe-upgrade:
+    pipeline:
+      - module: nodes
+      - module: dedicated-nodes
+      - module: kubespray
+        vars:          
+          playbook_vars:
+            upgrade_cluster_setup: true
+  apply:
+    pipeline:
+      - module: pki
+      - module: ssh
+      - module: nodes
+      - module: dedicated-nodes
+      - module: kubespray
+      - module: hcloud-ccm
+
+  label-nodes:
+    pipeline:
+      - module: nodes
+      - module: dedicated-nodes
+      - module: kubespray
+        vars:
+          playbook_tags: node-label
+
+  kubelet:
+    pipeline:
+      - module: kubespray
+        vars:
+          playbook_tags: kubelet
+      
+  reapply:
+    pipeline:
+      - name: destroy nodes
+        module: nodes
+        command: destroy
+      - title: create nodes
+        module: nodes
+      - title: configure dedicated nodes
+        module: dedicated-nodes
+      # - name: rm cluster secret state
+      #   module: kubespray
+      #   command: state rm vault_generic_secret.cluster
+      - module: kubespray
+      - module: hcloud-ccm
+      
+  scale:
+    pipeline:
+      - name: scale cluster
+        module: kubespray        
+        vars:
+          playbook: scale.yml
+
+modules:
+  pki:
+    src: core:lib/pki
+    providers: [vault, pkcs12]
+
+  ssh:
+    src: core:lib/cluster/ssh
+    providers: [vault, pkcs12]
+
+  nodes:
+    src: core:stack/kubespray/hcloud/
+    providers: ["hcloud", "vault", "ansible", "cluster_secret"]
+    deps: [ssh]
+    schemas:
+      vars: NodesVars
+
+  dedicated-nodes:
+    src: core:stack/kubespray/hetzner-dedicated
+    providers: ["hcloud", "vault", "cluster_secret", ansible, remote]
+    deps: [ssh]
+    inputs: [nodes]
+    schemas:
+      vars: HetznerDedicatedVars
+  
+
+  kubespray:
+    inputs:
+      dedicated-nodes: sys_nodes
+    src: core:stack/kubespray/kubespray
+    providers: [vault, ansible, local, cluster_secret, hcloud]
+    schemas:
+      vars: KubesprayVars
+    vars:
+      kubespray_path: {{stackd.resolve_path("kubespray:")}}
+      
+
+
+  hcloud-ccm:
+    deps: [cluster-secret]
+    src: core:lib/cluster/hcloud-ccm
+    schemas:
+      vars: HcloudCcmVars
+    providers: [vault, cluster_secret, kubernetes, helm, hcloud]
+
+  # upgrade:
+  #   inputs: [inventory, kubernetes]
+  #   deps: [cluster-secret]
+  #   src: ./lib/cluster/upgrade
+  #   providers: [vault, ansible, local, kubernetes, cluster_secret, "null"]
+  #   backend:
+  #     name: local

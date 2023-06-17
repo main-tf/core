@@ -1,0 +1,32 @@
+components:
+  schemas:
+    Resources:
+        type: object
+        properties:
+          requests:
+            type: object
+            properties:
+              cpu:
+                type: string                
+              memory:
+                type: string
+          limits:
+            type: object
+            properties:
+              cpu:
+                type: string                
+              memory:
+                type: string
+    Memory:
+        type: object
+        properties:
+          requests:
+            type: object
+            properties:            
+              memory:
+                type: string
+          limits:
+            type: object
+            properties:
+              memory:
+                type: string

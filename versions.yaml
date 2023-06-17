@@ -1,7 +1,7 @@
 
 hcloud:
   source: "hetznercloud/hcloud"
-  version: "1.36.2"
+  version: "1.38.2"
 
 # hetznerdns:
 #   source: "timohirt/hetznerdns"
@@ -61,8 +61,8 @@ random:
 
 
 ansible:
-  source: "habakke/ansible"
-  version: "2.0.1"
+  source: "ansible/ansible"
+  version: "1.1.0"
 
 argocd:
   source: "oboukili/argocd"
@@ -75,3 +75,7 @@ argocd:
 local:
   source: "hashicorp/local"
   version: "2.3.0"
+
+remote:
+  source: tenstad/remote
+  version: "0.1.1"

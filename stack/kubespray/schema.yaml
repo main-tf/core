@@ -1,0 +1,171 @@
+
+openapi: 3.0.2
+
+components:
+  schemas:
+    FirewalIPlList: &FirewalIPlList
+      type: array
+      items:
+        type: string
+      default:
+        - 0.0.0.0/0
+
+    NodePool: &NodePool
+      type: object
+      properties:
+        size:
+          type: number
+          description: |
+            number of nodes in pool
+        control_plain:
+          type: boolean
+        node_size:
+          type: string
+          enum: [cx11, cpx11, 
+            cx21, cpx21,
+            cx31, cpx31,
+            cx41, cpx41,
+            cx51, cpx51,            
+            ]
+        node_labels:
+          type: object
+          additionalProperties: 
+            type: string
+        node_taints:
+          type: array
+          items: 
+            type: string
+    StaticNode: &StaticNode
+      type: object
+      properties:
+        name:
+          type: string
+          description: |
+            node hostname        
+        node_type:
+          type: string
+          default: static-worker
+          enum: [static-worker, master, worker]
+        private_ip:
+          type: string
+          description: |
+            private ip address
+        public_ip:
+          type: string
+          description: |
+            public ip address
+        node_labels:
+          type: object
+          additionalProperties: 
+            type: string
+        node_taints:
+          type: array
+          items: 
+            type: string
+
+    NodesVars:
+      type: object
+      properties:
+        hcloud:
+          type: object
+          properties:
+            zone:
+              type: string
+              default: fsn1
+              enum: [nbg1, fsn1, hel1, hil, ash]
+            network_zone: &NetworkZone
+              type: string
+              default: eu-central
+              enum: [eu-central, us-west, us-east]
+            image:
+              type: string
+              default: ubuntu-22.04
+              enum: [ubuntu-22.04]
+            pools:
+              type: object
+              additionalProperties: *NodePool
+              description: |
+                node pools
+              default:
+                master:
+                  size: 3
+                  node_size: cx11
+                  control_plain: true
+                worker:
+                  size: 2
+                  node_size: cx11
+
+   
+            ssh_whitelist: *FirewalIPlList
+            api_server_whitelist: *FirewalIPlList
+            nodeport_whitelist: *FirewalIPlList
+            ingress_whitelist: *FirewalIPlList
+        ansible_vars:
+          type: object
+          properties:
+            external_hcloud_cloud:
+              type: object
+              properties:
+                hcloud_api_token:
+                  type: string
+                with_networks:
+                  type: boolean
+                  default: false
+
+    KubesprayVars:
+      type: object
+      properties:
+        static_nodes:
+          type: array          
+          items: *StaticNode
+        kubespray_vars:
+          type: object
+          properties:
+            kube_version:
+              type: string
+              default: "v1.26.5"
+            
+        
+    HcloudCcmVars:
+      type: object
+      properties:
+       
+                
+        versions:
+          type: object
+          properties:
+            ccm:
+              type: string
+              default: "v1.15.0"
+              description: |
+                The version of the hcloud cloud controller manager to use.
+                https://github.com/hetznercloud/hcloud-cloud-controller-manager
+            csi:
+              type: string
+              default: 2.2.1
+              description: |
+                check for official chart. outdated https://helm-charts.mlohr.com/hcloud-csi-driver/
+
+    HetznerDedicatedVars:
+      type: object
+      required: [network_id]
+      properties:
+        network_id:
+          type: number
+          description: |
+            cloud network id
+        network_zone: *NetworkZone
+        ip_range:
+          type: string
+          default: 10.0.20.0/24
+        vswitch_id:
+          type: number
+          description: |
+            dedicated server vswitch id
+        vlan_id:
+          type: number
+          description: |
+            dedicated server vlan id
+        servers:
+          type: array
+          items: *StaticNode
