@@ -70,8 +70,11 @@ resource "helm_release" "ccm" {
 
   values = [
     yamlencode({
+      args = {
+        "configure-cloud-routes" = "false"
+      }
       networking = {
-        enabled = false
+        enabled = true
         clusterCIDR = data.hcloud_network.net.ip_range
       }
       env = {

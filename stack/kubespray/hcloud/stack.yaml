@@ -41,6 +41,21 @@ operations:
         vars:          
           playbook_vars:
             upgrade_cluster_setup: true
+  
+  init:
+    pipeline:
+      - module: pki
+        command: init
+      - module: ssh
+        command: init
+      - module: nodes
+        command: init
+      - module: dedicated-nodes
+        command: init
+      - module: kubespray
+        command: init
+      - module: hcloud-ccm
+        command: init
   apply:
     pipeline:
       - module: pki
@@ -57,6 +72,16 @@ operations:
       - module: kubespray
         vars:
           playbook_tags: node-label
+  
+  remove-node:
+    pipeline:
+      - module: kubespray
+        vars:
+          playbook: remove-node.yml
+          playbook_vars:
+            # TODO: use operation arguments to pass node name
+            node: data-dedicated-1 
+            skip_confirmation: true
 
   kubelet:
     pipeline:
@@ -78,7 +103,7 @@ operations:
       #   command: state rm vault_generic_secret.cluster
       - module: kubespray
       - module: hcloud-ccm
-      
+
   scale:
     pipeline:
       - name: scale cluster
@@ -97,14 +122,14 @@ modules:
 
   nodes:
     src: core:stack/kubespray/hcloud/
-    providers: ["hcloud", "vault", "ansible", "cluster_secret"]
+    providers: ["hcloud", "vault", "cluster_secret"]
     deps: [ssh]
     schemas:
       vars: NodesVars
 
   dedicated-nodes:
     src: core:stack/kubespray/hetzner-dedicated
-    providers: ["hcloud", "vault", "cluster_secret", ansible, remote]
+    providers: ["hcloud", "vault", "cluster_secret", remote]
     deps: [ssh]
     inputs: [nodes]
     schemas:
@@ -115,7 +140,7 @@ modules:
     inputs:
       dedicated-nodes: sys_nodes
     src: core:stack/kubespray/kubespray
-    providers: [vault, ansible, local, cluster_secret, hcloud]
+    providers: [vault, local, cluster_secret, hcloud]
     schemas:
       vars: KubesprayVars
     vars:
@@ -124,7 +149,7 @@ modules:
 
 
   hcloud-ccm:
-    deps: [cluster-secret]
+    deps: [kubespray]
     src: core:lib/cluster/hcloud-ccm
     schemas:
       vars: HcloudCcmVars
