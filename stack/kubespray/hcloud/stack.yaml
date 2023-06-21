@@ -2,28 +2,6 @@
 
 schema: !include core:stack/kubespray/schema.yaml
 
-# operations:
-#   deploy:
-#     configurations:
-#       default:
-#         command: apply
-#         modules: [pki, dns-zone, nodes, inventory, kubernetes, cluster-secret, hcloud-ccm]
-  
-#   scale:
-#     configurations:
-#       default:
-#         command: apply
-#         title: "hcloud nodes scalinig"
-#         modules: [nodes, inventory, kubernetes]
-
-#   upgrade:
-#     configurations:
-#       default:
-#         command: apply
-#         title: "upgrade k8s cluster"
-#         name: upgrade
-#         modules: [inventory, upgrade]
-
 operations:
   upgrade-cluster:
     pipeline:
@@ -82,6 +60,8 @@ operations:
             # TODO: use operation arguments to pass node name
             node: data-dedicated-1 
             skip_confirmation: true
+            reset_nodes: false
+            allow_ungraceful_removal: true
 
   kubelet:
     pipeline:
@@ -106,10 +86,13 @@ operations:
 
   scale:
     pipeline:
+      - module: nodes
+      - module: dedicated-nodes
       - name: scale cluster
         module: kubespray        
         vars:
           playbook: scale.yml
+          playbook_skip_tags: node-label
 
 modules:
   pki:

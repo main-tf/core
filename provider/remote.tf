@@ -1,4 +1,4 @@
 
 
 
-provider remote {}
+provider "remote" {}

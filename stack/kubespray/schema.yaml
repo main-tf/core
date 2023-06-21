@@ -10,6 +10,28 @@ components:
       default:
         - 0.0.0.0/0
 
+    FirewallRule: &FirewallRule
+      type: object
+      properties:
+        description:
+          type: string
+          description: |
+            rule description
+        direction:
+          type: string
+          default: in
+          enum: [in, out]
+        protocol:
+          type: string
+          default: tcp
+          enum: [tcp, udp, icmp, gre, esp]
+        port:
+          type: string
+          description: |
+            port number or range
+        source_ips: *FirewalIPlList
+        destination_ips: *FirewalIPlList
+
     NodePool: &NodePool
       type: object
       properties:
@@ -35,6 +57,7 @@ components:
           type: array
           items: 
             type: string
+            
     StaticNode: &StaticNode
       type: object
       properties:
@@ -100,6 +123,16 @@ components:
             api_server_whitelist: *FirewalIPlList
             nodeport_whitelist: *FirewalIPlList
             ingress_whitelist: *FirewalIPlList
+
+            firewalls:
+              type: object
+              properties:
+                master: 
+                  type: array
+                  items: *FirewallRule
+                worker: 
+                  type: array
+                  items: *FirewallRule
         # ansible_vars:
         #   type: object
         #   properties:

@@ -1,0 +1,78 @@
+components:
+  schemas:
+    NodeSelector:
+      type: object
+      additionalProperties:
+        type: string
+
+    Tolerations:
+      type: array
+      items:
+        type: object
+        properties:
+          key:
+            type: string
+          operator:
+            type: string
+            default: Exists
+            enum: [Exists, Equal]
+          effect:
+            type: string
+            default: NoSchedule
+            enum: [NoSchedule, PreferNoSchedule, NoExecute]
+          value:
+            type: string
+          tolerationSeconds:
+            type: integer          
+
+    NodeAffinity:
+      type: object
+      properties:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          type: object
+          properties:
+            nodeSelectorTerms:
+              type: array
+              items:
+                type: object
+                properties:
+                  matchExpressions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        operator:
+                          type: string
+                          default: In
+                        values:
+                          type: array
+                          items:
+                            type: string
+        preferredDuringSchedulingIgnoredDuringExecution:
+          type: array
+          items:
+            type: object
+            properties:
+              weight:
+                type: integer
+                default: 1                
+              preference:
+                type: object
+                properties:
+                  matchExpressions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        operator:
+                          type: string
+                          default: In
+                        values:
+                          type: array
+                          items:
+                            type: string
+

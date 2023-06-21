@@ -10,6 +10,8 @@ components:
                 type: string                
               memory:
                 type: string
+              storage:
+                type: string
           limits:
             type: object
             properties:
@@ -30,3 +32,58 @@ components:
             properties:
               memory:
                 type: string
+
+    PersistentLocalVolume:
+      description: |
+        persistent local volume
+      type: object
+      properties:
+        count:
+          type: integer
+          default: 1
+          description: |
+            number of volumes to create on each node
+        nodes:
+          type: array
+          items:
+            type: string
+          description: |
+            nodes to create volumes on
+        size: 
+          type: string
+          default: 10Gi
+        accessModes:
+          type: array
+          items:
+            type: string
+            enum: [ReadWriteOnce, ReadOnlyMany, ReadWriteMany]
+          default:
+            - ReadWriteOnce
+        storageClassName:
+          type: string
+          default: "local"
+        path_prefix:
+          type: string
+          default: "/mnt/volumes"
+        nodeSelectorTerms:
+          type: array
+          items:
+            type: object
+            properties:
+              matchExpressions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    key:
+                      type: string
+                    operator:
+                      type: string
+                      default: In
+                      enum: [In, NotIn, Exists, DoesNotExist, Gt, Lt]
+                    values:
+                      type: array
+                      items:
+                        type: string
+
+        

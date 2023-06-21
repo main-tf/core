@@ -1,0 +1,33 @@
+# bitnami charts-related schemas
+
+components:
+  schemas:
+    Persistence:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+        storageClass:
+          type: string
+          default: ""
+        accessModes:
+          type: array
+          items:
+            type: string
+            enum: [ReadWriteOnce, ReadOnlyMany, ReadWriteMany]
+          default:
+            - ReadWriteOnce
+        size:
+          type: string
+          default: 8Gi
+        
+        selector:
+          type: object
+          properties:
+            matchLabels:
+              type: object
+              additionalProperties:
+                type: string
+            
+          

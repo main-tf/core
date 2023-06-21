@@ -1,22 +1,22 @@
 output "master_ip_addresses" {
   value = {
     for name, machine in var.machines :
-      name => {
-        "private_ip" = hcloud_server_network.machine[name].ip
-        "public_ip"  = hcloud_server.machine[name].ipv4_address
-      }
-      if machine.node_type == "master"
+    name => {
+      "private_ip" = hcloud_server_network.machine[name].ip
+      "public_ip"  = hcloud_server.machine[name].ipv4_address
+    }
+    if machine.node_type == "master"
   }
 }
 
 output "worker_ip_addresses" {
   value = {
     for name, machine in var.machines :
-      name => {
-        "private_ip" = hcloud_server_network.machine[name].ip
-        "public_ip"  = hcloud_server.machine[name].ipv4_address
-      }
-      if machine.node_type == "worker"
+    name => {
+      "private_ip" = hcloud_server_network.machine[name].ip
+      "public_ip"  = hcloud_server.machine[name].ipv4_address
+    }
+    if machine.node_type == "worker"
   }
 }
 

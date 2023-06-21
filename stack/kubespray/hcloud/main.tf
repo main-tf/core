@@ -1,4 +1,4 @@
-variable  hcloud { 
+variable "hcloud" {
 
 }
 
@@ -23,6 +23,7 @@ module "kubernetes" {
   api_server_whitelist = var.hcloud.api_server_whitelist
   nodeport_whitelist   = var.hcloud.nodeport_whitelist
   ingress_whitelist    = var.hcloud.ingress_whitelist
+  firewalls            = var.hcloud.firewalls
 
   providers = {
     hcloud = hcloud
@@ -36,29 +37,29 @@ module "kubernetes" {
 locals {
 
 
-  machines = { for m in flatten([ for pool_name, pool in var.hcloud.pools: [ for i in range(1, pool.size + 1): merge({
-    name = "${pool_name}-${i}"
+  machines = { for m in flatten([for pool_name, pool in var.hcloud.pools : [for i in range(1, pool.size + 1) : merge({
+    name      = "${pool_name}-${i}"
     node_type = lookup(pool, "control_plain", false) ? "master" : "worker"
-    size = pool.node_size
-    image = var.hcloud.image
+    size      = pool.node_size
+    image     = var.hcloud.image
     pool_name = pool_name
-  },lookup(pool, "node_taints", false) != false ? {node_taints = pool.node_taints} : {},
-    lookup(pool, "node_labels", false) != false ? {node_labels = pool.node_labels} : {},
-  )]]): m.name => m }
+    }, lookup(pool, "node_taints", false) != false ? { node_taints = pool.node_taints } : {},
+    lookup(pool, "node_labels", false) != false ? { node_labels = pool.node_labels } : {},
+  )]]) : m.name => m }
 
 
 
   k8s_nodes = merge(module.kubernetes.master_ip_addresses, module.kubernetes.worker_ip_addresses)
 
-  nodes = { for name, machine in local.machines: name => merge(machine, lookup(local.k8s_nodes, "${local.stackd.cluster_name}-${name}", {}), {
+  nodes = { for name, machine in local.machines : name => merge(machine, lookup(local.k8s_nodes, "${local.stackd.cluster_name}-${name}", {}), {
     name = "${local.stackd.cluster_name}-${name}"
   }) }
 
-  
+
 }
 
-output nodes {
-  value       = local.nodes  
+output "nodes" {
+  value = local.nodes
 }
 
 output "cluster_private_network_cidr" {

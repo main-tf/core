@@ -6,7 +6,7 @@ resource "kubernetes_secret" "hcloud" {
 
   data = {
     hcloudApiToken = data.vault_generic_secret.hcloud.data.hcloud_token
-    network = data.hcloud_network.net.id
+    network        = data.hcloud_network.net.id
   }
 }
 
@@ -59,14 +59,14 @@ variable "versions" {
 # }
 
 resource "helm_release" "ccm" {
-  chart            = "hcloud-cloud-controller-manager"                      
+  chart            = "hcloud-cloud-controller-manager"
   repository       = "https://charts.hetzner.cloud"
   name             = "hccm"
   namespace        = "kube-system"
   wait_for_jobs    = true
   create_namespace = false
   version          = var.versions.ccm
- 
+
 
   values = [
     yamlencode({
@@ -74,7 +74,7 @@ resource "helm_release" "ccm" {
         "configure-cloud-routes" = "false"
       }
       networking = {
-        enabled = true
+        enabled     = true
         clusterCIDR = data.hcloud_network.net.ip_range
       }
       env = {
@@ -82,7 +82,7 @@ resource "helm_release" "ccm" {
           valueFrom = {
             secretKeyRef = {
               name = "hcloud"
-              key = "hcloudApiToken"
+              key  = "hcloudApiToken"
             }
           }
         }

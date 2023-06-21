@@ -42,3 +42,7 @@ variable "private_subnet_cidr" {
 variable "network_zone" {
   default = "eu-central"
 }
+
+variable "firewalls" {
+  default = { master = [], worker = [] }
+}
