@@ -20,6 +20,10 @@ variable "chart_repository" {
 
 }
 
+variable chart_postrender {
+    default = null
+}
+
 resource "kubernetes_namespace" "ns" {
   metadata {
     name = local.stackd.namespace
@@ -42,6 +46,14 @@ resource "kubernetes_secret" "admin" {
   }
 }
 
+output "namespace" {
+  value = local.stackd.namespace
+}
+
+output "service_name" {
+  value = local.stackd.service
+}
+
 resource "helm_release" "app" {
   depends_on       = [kubernetes_namespace.ns, kubernetes_secret.admin]
   create_namespace = false
@@ -50,6 +62,15 @@ resource "helm_release" "app" {
   chart            = var.chart_name
   version          = var.chart_version
   namespace        = local.stackd.namespace
+
+  dynamic postrender {
+    for_each = var.chart_postrender != null ? [1] : []
+    content {
+      binary_path = var.chart_postrender.binary_path
+      args        = var.chart_postrender.args
+    }
+  }
+ 
   values = [yamlencode(merge({
     clusterDomain = "${local.stackd.cluster}.local",
     auth = {

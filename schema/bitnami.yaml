@@ -2,6 +2,19 @@
 
 components:
   schemas:
+    PersistenceShort:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+        storageClass:
+          type: string
+          default: ""
+        size:
+          type: string
+          default: 8Gi
+        
     Persistence:
       type: object
       properties:

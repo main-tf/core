@@ -1,0 +1,13 @@
+
+
+modules:
+  storage:
+    src: core:stack/vault/storage/
+    providers: [aws_env]
+  
+  vault:
+    src: core:stack/vault/local/
+    providers: [docker]
+    inputs:
+      storage: vault_storage
+    
