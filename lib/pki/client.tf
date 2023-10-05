@@ -1,5 +1,5 @@
 resource "vault_mount" "client" {
-  path                      = format("pki-%s-client", var.env)
+  path                      = format("pki-%s-client", local.stackd.env)
   type                      = "pki"
   default_lease_ttl_seconds = 315350000
   max_lease_ttl_seconds     = 315360000
@@ -22,8 +22,8 @@ resource "vault_pki_secret_backend_intermediate_cert_request" "client" {
 
   backend      = vault_mount.client.path
   type         = "exported"
-  common_name  = format("%s-client", var.env)
-  organization = format("%s client CA", var.env)
+  common_name  = format("%s-client", local.stackd.env)
+  organization = format("%s client CA", local.stackd.env)
   key_type     = "ec"
   key_bits     = 256
 }
@@ -32,7 +32,7 @@ resource "vault_pki_secret_backend_root_sign_intermediate" "client" {
   backend        = vault_mount.root.path
   csr            = vault_pki_secret_backend_intermediate_cert_request.client.csr
   use_csr_values = true
-  common_name    = format("%s-client", var.env)
+  common_name    = format("%s-client", local.stackd.env)
 }
 
 resource "vault_pki_secret_backend_intermediate_set_signed" "client" {
@@ -50,7 +50,7 @@ resource "vault_pki_secret_backend_cert" "client" {
   backend = vault_mount.client.path
   name    = vault_pki_secret_backend_role.client.name
 
-  common_name = format("%s-client", var.cluster)
+  common_name = format("%s-client", local.stackd.env)
 }
 
 output "client_certificate" {
@@ -93,7 +93,7 @@ output "pki_vault_client_role" {
 
 
 output "pki_vault_client_mount_path" {
-  value = format("pki-%s-client", var.env)
+  value = format("pki-%s-client", local.stackd.env)
 }
 
 
@@ -116,11 +116,11 @@ output "client_p12_password" {
 
 // resource "vault_pki_secret_backend_root_sign" "ingress" {
 //   depends_on           = [vault_pki_secret_backend_intermediate_cert_request.ingress]
-//   backend              = "pki-${var.env}"
+//   backend              = "pki-${local.stackd.env}"
 //   csr                  = vault_pki_secret_backend_intermediate_cert_request.ingress.csr
-//   common_name          = format("%s %s", var.env, var.service)
+//   common_name          = format("%s %s", local.stackd.env, var.service)
 //   exclude_cn_from_sans = true
 //   ou                   = var.service
-//   organization         = var.env
+//   organization         = local.stackd.env
 //   use_csr_values = true
 // }

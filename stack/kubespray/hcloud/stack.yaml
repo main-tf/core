@@ -6,7 +6,7 @@ operations:
   upgrade-cluster:
     pipeline:
       - module: nodes
-      - module: dedicated-nodes
+      #- module: dedicated-nodes
       - module: kubespray
         vars:
           playbook: upgrade-cluster.yml
@@ -40,6 +40,13 @@ operations:
       - module: ssh
       - module: nodes
       - module: dedicated-nodes
+      - module: kubespray
+      - module: hcloud-ccm
+  apply-noded:
+    pipeline:
+      - module: pki
+      - module: ssh
+      - module: nodes      
       - module: kubespray
       - module: hcloud-ccm
 
@@ -121,7 +128,7 @@ modules:
 
   kubespray:
     inputs:
-      dedicated-nodes: sys_nodes
+      nodes: sys_nodes
     src: core:stack/kubespray/kubespray
     providers: [vault, local, cluster_secret, hcloud]
     schemas:

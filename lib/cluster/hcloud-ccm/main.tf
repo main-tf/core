@@ -5,7 +5,7 @@ resource "kubernetes_secret" "hcloud" {
   }
 
   data = {
-    hcloudApiToken = data.vault_generic_secret.hcloud.data.hcloud_token
+    token = data.vault_generic_secret.hcloud.data.hcloud_token
     network        = data.hcloud_network.net.id
   }
 }
@@ -82,7 +82,7 @@ resource "helm_release" "ccm" {
           valueFrom = {
             secretKeyRef = {
               name = "hcloud"
-              key  = "hcloudApiToken"
+              key  = "token"
             }
           }
         }
@@ -94,25 +94,39 @@ resource "helm_release" "ccm" {
 
 resource "helm_release" "csi" {
   chart            = "hcloud-csi-driver"
-  repository       = "https://helm-charts.mlohr.com/"
+  // repository       = "https://helm-charts.mlohr.com/"
+  repository = "https://stackdiac.github.io/charts"
   name             = "csi-driver"
   namespace        = "kube-system"
   wait_for_jobs    = true
   create_namespace = false
   version          = var.versions.csi
 
-  set {
-    name  = "secret.existingSecretName"
-    value = "hcloud"
-  }
 
   set {
-    name  = "storageClass.isDefault"
-    value = "true"
+    name  = "kubernetesClusterDomain"
+    value = format("%s.local", local.stackd.env)
   }
-  set {
-    name  = "metrics.enabled"
-    value = true
-  }
+
+  values = [
+    yamlencode({
+      storageClassName = "hcloud-volume"
+      hcloudCsiController = {
+        hcloudCsiDriver = {
+          image = {
+            tag = "v${var.versions.csi}"
+          }
+        }
+        
+      }
+      hcloudCsiNode = {
+         hcloudCsiDriver = {
+          image = {
+            tag = "v${var.versions.csi}"
+          }
+        }
+      }
+    })
+  ]
 
 }

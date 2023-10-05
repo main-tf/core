@@ -6,11 +6,11 @@ variable "dns_zone" {
 
 
 locals {
-  dns_zone = format("%s.%s", var.env, var.dns_zone)
+  dns_zone = format("%s.%s", local.stackd.env, local.stackd.dns_zone)
 }
 
 resource "vault_mount" "root" {
-  path                      = format("pki-%s-root", var.env)
+  path                      = format("pki-%s-root", local.stackd.env)    #####
   type                      = "pki"
   default_lease_ttl_seconds = 315350000
   max_lease_ttl_seconds     = 315360000
@@ -24,8 +24,8 @@ resource "tls_private_key" "root_key" {
 resource "tls_self_signed_cert" "root_cert" {
   private_key_pem = tls_private_key.root_key.private_key_pem
   subject {
-    common_name  = "${var.env} Root CA"
-    organization = var.env
+    common_name  = "${local.stackd.env} Root CA"
+    organization = local.stackd.env
     //  organizational_unit = "master"
     //  street_address = ["33 Main Street"]
     //  locality = "Beverly Hills"
@@ -49,8 +49,8 @@ resource "tls_self_signed_cert" "root_cert" {
 resource "vault_pki_secret_backend_config_urls" "config_urls" {
   depends_on = [ vault_mount.root ]  
   backend              = vault_mount.root.path
-  issuing_certificates = ["${var.vault_address}/v1/pki-${var.env}/ca"]
-  crl_distribution_points= ["${var.vault_address}/v1/pki-${var.env}/crl"]
+  issuing_certificates = ["${var.vault_address}/v1/pki-${local.stackd.env}/ca"]
+  crl_distribution_points= ["${var.vault_address}/v1/pki-${local.stackd.env}/crl"]
 }
 
 */
@@ -88,19 +88,19 @@ resource "vault_pki_secret_backend_root_cert" "root" {
   depends_on            = [vault_mount.root]
   backend               = vault_mount.root.path
   type                  = "internal"
-  common_name           = var.env
+  common_name           = local.stackd.env
   ttl                   = "315360000"
   format                = "pem"
   private_key_format    = "der"
   key_type              = "rsa"
   key_bits              = 4096
   exclude_cn_from_sans  = true
-  ou                    = var.env
+  ou                    = local.stackd.env
 //  organization          = "My organization"
 }*/
 
 resource "vault_generic_secret" "ca" {
-  path = format("kv/%s/pki/ca", var.env)
+  path = format("kv/%s/pki/ca", local.stackd.env)
   data_json = jsonencode({
     crt        = tls_self_signed_cert.root_cert.cert_pem
     key        = tls_private_key.root_key.private_key_pem
@@ -113,7 +113,7 @@ resource "vault_generic_secret" "ca" {
 
 data "vault_generic_secret" "ca" {
   depends_on = [vault_generic_secret.ca]
-  path       = format("kv/%s/pki/ca", var.env)
+  path       = format("kv/%s/pki/ca", local.stackd.env)
 }
 
 
@@ -128,7 +128,7 @@ resource "vault_pki_secret_backend_config_ca" "root" {
 //   backend    = vault_mount.root.path
 //   name       = vault_pki_secret_backend_role.ca.name
 //   csr               = vault_pki_secret_backend_intermediate_cert_request.certmanager.csr
-//   common_name          = var.env
+//   common_name          = local.stackd.env
 // }
 
 // resource "vault_pki_secret_backend_cert" "cm" {
@@ -137,7 +137,7 @@ resource "vault_pki_secret_backend_config_ca" "root" {
 //   backend = vault_mount.root.path
 //   name = vault_pki_secret_backend_role.ca.name
 
-//   common_name = var.env
+//   common_name = local.stackd.env
 // }
 
 

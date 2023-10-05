@@ -1,17 +1,17 @@
 resource "vault_mount" "svc" {
   type                      = "pki"
-  path                      = format("pki-%s-svc", var.env)
+  path                      = format("pki-%s-svc", local.stackd.env)
   default_lease_ttl_seconds = 63072000 # 2 years
   max_lease_ttl_seconds     = 63072000 # 2 years
-  description               = "${var.env} cluster CA"
+  description               = "${local.stackd.env} cluster CA"
 }
 
 resource "vault_pki_secret_backend_intermediate_cert_request" "svc" {
   depends_on   = [vault_mount.svc]
   backend      = vault_mount.svc.path
   type         = "exported"
-  common_name  = format("%s-svc", var.env)
-  organization = format("%s services CA", var.env)
+  common_name  = format("%s-svc", local.stackd.env)
+  organization = format("%s services CA", local.stackd.env)
   key_type     = "ec"
   key_bits     = 256
 }
@@ -22,7 +22,7 @@ resource "vault_pki_secret_backend_root_sign_intermediate" "svc" {
   backend = vault_mount.root.path
   csr     = vault_pki_secret_backend_intermediate_cert_request.svc.csr
   // name = "ca" // role name
-  common_name    = format("%s-svc", var.env)
+  common_name    = format("%s-svc", local.stackd.env)
   use_csr_values = true
 }
 
@@ -45,18 +45,18 @@ resource "vault_pki_secret_backend_intermediate_set_signed" "svc" {
 
 // resource "vault_pki_secret_backend_root_sign" "svc" {
 //   depends_on           = [vault_pki_secret_backend_intermediate_cert_request.svc]
-//   backend              = "pki-${var.env}"
+//   backend              = "pki-${local.stackd.env}"
 //   csr                  = vault_pki_secret_backend_intermediate_cert_request.svc.csr
-//   common_name          = format("%s %s", var.env, var.service)
+//   common_name          = format("%s %s", local.stackd.env, var.service)
 //   exclude_cn_from_sans = true
 //   ou                   = var.service
-//   organization         = var.env
+//   organization         = local.stackd.env
 //   use_csr_values = true
 // }
 
 resource "vault_generic_secret" "svc" {
   depends_on = [vault_pki_secret_backend_intermediate_set_signed.svc]
-  path       = "kv/${var.env}/pki/svc"
+  path       = "kv/${local.stackd.env}/pki/svc"
   data_json = jsonencode({
     crt = vault_pki_secret_backend_root_sign_intermediate.svc.certificate
     bundle = join("\n", [
@@ -70,5 +70,5 @@ resource "vault_generic_secret" "svc" {
 
 data "vault_generic_secret" "svc" {
   depends_on = [vault_generic_secret.svc]
-  path       = "kv/${var.env}/pki/svc"
+  path       = "kv/${local.stackd.env}/pki/svc"
 }

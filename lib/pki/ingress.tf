@@ -1,9 +1,9 @@
 resource "vault_mount" "ingress" {
   type                      = "pki"
-  path                      = format("pki-%s-ingress", var.env)
+  path                      = format("pki-%s-ingress", local.stackd.env)
   default_lease_ttl_seconds = 63072000 # 2 years
   max_lease_ttl_seconds     = 63072000 # 2 years
-  description               = "${var.env} cluster CA"
+  description               = "${local.stackd.env} cluster CA"
 }
 
 /*
@@ -18,8 +18,8 @@ resource "tls_cert_request" "ingress" {
   private_key_pem = tls_private_key.ingress.private_key_pem
  
   subject {
-    common_name = format("%s-%s", var.env, var.service)
-    organization = format("%s Inc", var.env)
+    common_name = format("%s-%s", local.stackd.env, var.service)
+    organization = format("%s Inc", local.stackd.env)
   }
 }
 */
@@ -28,8 +28,8 @@ resource "vault_pki_secret_backend_intermediate_cert_request" "ingress" {
   depends_on   = [vault_mount.ingress]
   backend      = vault_mount.ingress.path
   type         = "exported"
-  common_name  = format("%s", var.env)
-  organization = format("%s Inc", var.env)
+  common_name  = format("%s", local.stackd.env)
+  organization = format("%s Inc", local.stackd.env)
   key_type     = "ec"
   key_bits     = 256
 }
@@ -40,7 +40,7 @@ resource "vault_pki_secret_backend_root_sign_intermediate" "ingress" {
   backend = vault_mount.root.path
   csr     = vault_pki_secret_backend_intermediate_cert_request.ingress.csr
   // name = "ca" // role name
-  common_name    = format("%s", var.env)
+  common_name    = format("%s", local.stackd.env)
   use_csr_values = true
 }
 
@@ -63,18 +63,18 @@ resource "vault_pki_secret_backend_intermediate_set_signed" "ingress" {
 
 // resource "vault_pki_secret_backend_root_sign" "ingress" {
 //   depends_on           = [vault_pki_secret_backend_intermediate_cert_request.ingress]
-//   backend              = "pki-${var.env}"
+//   backend              = "pki-${local.stackd.env}"
 //   csr                  = vault_pki_secret_backend_intermediate_cert_request.ingress.csr
-//   common_name          = format("%s %s", var.env, var.service)
+//   common_name          = format("%s %s", local.stackd.env, var.service)
 //   exclude_cn_from_sans = true
 //   ou                   = var.service
-//   organization         = var.env
+//   organization         = local.stackd.env
 //   use_csr_values = true
 // }
 
 resource "vault_generic_secret" "ingress" {
   depends_on = [vault_pki_secret_backend_intermediate_set_signed.ingress]
-  path       = "kv/${var.env}/pki/ingress"
+  path       = "kv/${local.stackd.env}/pki/ingress"
   data_json = jsonencode({
     crt = vault_pki_secret_backend_root_sign_intermediate.ingress.certificate
     bundle = join("\n", [
@@ -88,5 +88,5 @@ resource "vault_generic_secret" "ingress" {
 
 data "vault_generic_secret" "ingress" {
   depends_on = [vault_generic_secret.ingress]
-  path       = "kv/${var.env}/pki/ingress"
+  path       = "kv/${local.stackd.env}/pki/ingress"
 }

@@ -9,6 +9,8 @@ variable "vault_token" {
 provider "vault" {
   address = var.vault_address
   token   = var.vault_token
+  // timeout token
+  
 }
 
 # data "vault_generic_secret" "vault_v2" {
